@@ -30,8 +30,9 @@
         \begin{column}{0.60\textwidth}
             {\large
             \begin{block}{\large Basics}
-                Proposed by famous paper \citetitle{vaswani2023attentionneed}~\cite{vaswani2023attentionneed}.
+                Proposed by famous Google paper \citetitle{vaswani2023attentionneed}~\cite{vaswani2023attentionneed}.
                 \begin{itemize}
+                    \setlength{\itemsep}{0.5em}
                     \item Numerous applications in NLP, Computer Vision, ...
                     \item Process sequence of input \textbf{tokens}
                     \item Stack of identical layers
@@ -63,10 +64,14 @@
         \[
             \text{Attention}(Q,K,V) = \text{softmax}\Big(\frac{Q K^\top}{\sqrt{d}}\Big) V
         \]
-        \item where the matrices $Q$, $K$, and $V$ are different linear projections of the input tokens
-        }
-    \end{itemize}
 
+        \vspace{0.5em}
+
+        where the matrices $Q$, $K$, and $V$ are different linear projections of the input tokens $X$
+        \vspace{1.0em}
+        \item $\text{softmax}\Big(\frac{Q K^\top}{\sqrt{d}}\Big)$ regarded as \textbf{attention weights}
+        } \textcolor{red}{Explain linear projections and row normalization}
+    \end{itemize}
     \vspace{1.5em}
 
     \begin{block}{\large Result}
@@ -79,15 +84,21 @@
     \begin{block}{\large Token Processing }
         \begin{itemize}
             {\large
-            \item Self-attention operation is executed in each layer
+            \item Self-attention operation is executed in \textbf{each layer}
             \vspace{0.25em}
-            \item Across layers, information from different tokens gets increasingly mixed
+            \item Across layers, \textbf{information} from different tokens gets increasingly \textbf{mixed}
             }
         \end{itemize}
 
-        \vspace{1.0em}
+        % \vspace{1.0em}
 
-        \large \textbf{Research Question}: \textit{How can we quantify this information flow across multiple layers?}
+        % \large \textbf{Research Question}: \textit{How can we quantify this information flow across multiple layers?}
+    \end{block}
+
+    \vspace{1.5em}
+
+    \begin{block}{\large Research Question}
+        \large \textit{How can we quantify this information flow across multiple layers?}
     \end{block}
 \end{frame}
 
@@ -96,7 +107,7 @@
     \begin{itemize}
         {\large 
         \item \textbf{Nodes}: Input tokens \& hidden embeddings
-        \item \textbf{Edges}: Attentions from nodes in each layer to those in previous layer
+        \item \textbf{Edges}: Attention weights from nodes in each layer to those in previous layer
         }
     \end{itemize}
 
@@ -109,23 +120,215 @@
 
 \begin{frame}{Attention Flow DAG}
     \centering
-    \Large \textbf{Input}: \textit{the \textcolor{blue}{key} to the \textcolor{red}{cabinets} \dots} [\textbf{is} / \textbf{are}?]
+    \large \textbf{Input}: \texttt{\textcolor{orange}{<cls>} \textcolor{blue}{<bos>} the key to the cabinets \textcolor{red}{<verb>}}
 
-    % \vspace{-0.5em}
+    \vspace{0.5em}
 
     \begin{figure}
         \centering
         \includegraphics[width=0.8\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/attention_dag1.png}
         \vspace{-0.5em}
-        \caption{Attention Flow Graph of tokenized input sentence.}
+        \caption{Attention Flow Graph of input sentence.}
     \end{figure}
 \end{frame}
 
+\begin{frame}{Raw Attention Visualized}
+    \centering
+    \large \textbf{Input}: \texttt{\textcolor{orange}{<cls>} \textcolor{blue}{<bos>} the key to the cabinets \textcolor{red}{<verb>}}
+
+    \vspace{0.5em}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.6\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/raw_attention_correct.png}
+        \vspace{-0.5em}
+        \caption{Raw Attention map for the \texttt{\textcolor{orange}{<cls>}} token at different layers.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Methods}
+    \begin{block}{\large Attention Rollout}
+        \begin{itemize}
+            {\large
+            \item Recursively multiply \textbf{attention weight matrices} across transformer layers:
+            \[
+                \tilde{A}^{(l)} =  \left(A^{(l)} +  \mathbb{I} \right) \cdot \tilde{A}^{(l-1)},
+                \quad \tilde{A}^{(0)} = \mathbb{I}
+            \]
+    
+            \vspace{0.5em}
+    
+            where $A^{(l)} = $ are the attention weights from layer $l$
+            
+            \vspace{0.5em}
+
+            \item \textbf{Row-normalization} after each multiplication
+            \vspace{0.25em}
+            \item Whole operation in $\mathcal{O}(d \times n^2)$
+            }
+        \end{itemize}
+        \vspace{0.5em}
+        \hrule
+        \vspace{0.1em}
+        {\scriptsize \textbf{Notation}: $d$ is model depth, $n$ is sequence length.}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Methods}
+    \begin{block}{\large Attention Flow}
+        \begin{itemize}
+            {\large
+            \setlength{\itemsep}{0.5em}
+            \item Attention graph as a \textbf{flow network}
+            
+            \item Capacities of edges are attention weights
+            \item \textbf{Maximum flow algorithm} to compute attention flow from \textbf{one} node in output layer to \textbf{one} node in input layer
+            \item One computation in $\mathcal{O}(d^2 \times n^4)$
+            }
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Results}
+
+    % \vspace{1em}
+
+    \centering
+    \large \textbf{Input}: \texttt{\textcolor{orange}{<cls>} \textcolor{blue}{<bos>} the key to the cabinets \textcolor{red}{<verb>}}
+
+    \vspace{1em}
+    
+    \begin{figure}
+    \begin{columns}[t] % [t] aligns the tops of the images
+        % First Image: Raw Attention
+            \begin{column}{0.33\textwidth}
+                \centering
+                \textbf{\small Raw}
+
+                \vspace{0.2em}
+
+                \includegraphics[width=\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/raw_attention_correct.png}
+            \end{column}
+
+            % Second Image: Attention Rollout
+            \begin{column}{0.33\textwidth}
+                \centering
+                \textbf{\small Rollout}
+
+                \vspace{0.2em}
+
+                \includegraphics[width=\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/results_rollout_correct.png}
+            \end{column}
+
+            % Third Image: Attention Flow
+            \begin{column}{0.33\textwidth}
+                \centering
+                \textbf{\small Flow}
+
+                \vspace{0.2em}
+
+                \includegraphics[width=\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/results_flow_correct.png}
+            \end{column}
+        \end{columns}
+        \caption{Comparison of attention maps for the \texttt{\textcolor{orange}{<cls>}} token at different layers.}
+    \end{figure}
+
+    \vspace{-2em}
+
+    \centering
+
+    {\Large \textbf{Correctly classified?} } \quad {\LARGE \textcolor{green}{\ding{51}}}
+\end{frame}
+
+\begin{frame}{Results}
+    \centering
+    \textbf{Input}: \texttt{\textcolor{orange}{<cls>} \textcolor{blue}{<bos>} here the NNS differ in that the female \textcolor{red}{<verb>}}
+
+    \vspace{1em}
+    
+    \begin{figure}
+    \begin{columns}[t] % [t] aligns the tops of the images
+        % First Image: Raw Attention
+            \begin{column}{0.33\textwidth}
+                \centering
+                \textbf{\small Raw}
+
+                \vspace{0.2em}
+
+                \includegraphics[width=\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/raw_attention_false.png}
+            \end{column}
+
+            % Second Image: Attention Rollout
+            \begin{column}{0.33\textwidth}
+                \centering
+                \textbf{\small Rollout}
+
+                \vspace{0.2em}
+
+                \includegraphics[width=\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/results_rollout_false.png}
+            \end{column}
+
+            % Third Image: Attention Flow
+            \begin{column}{0.33\textwidth}
+                \centering
+                \textbf{\small Flow}
+
+                \vspace{0.2em}
+
+                \includegraphics[width=\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/results_flow_false.png}
+            \end{column}
+        \end{columns}
+        \caption{Comparison of attention maps for the \texttt{\textcolor{orange}{<cls>}} token at different layers.}
+    \end{figure}
+
+    \vspace{-2em}
+
+    \centering
+
+    {\Large \textbf{Correctly classified?} } \quad {\LARGE \textcolor{red}{\ding{55}}}
+\end{frame}
+
+\begin{frame}{Conclusion}
+    \begin{block}{\large Attention Rollout \& Attention Flow}
+        \begin{itemize}
+            \setlength{\itemsep}{0.5em}
+            {\large
+            \item Methods for explaining attention in transformer models
+            \item Architecture agnostic
+            \item Provide insights into correct classifications and misclassifications
+            \item Attention Rollout computationally more feasible and more accurate results
+            }
+        \end{itemize}
+    \end{block}
+\end{frame}
 
 
 
 \begin{frame}
     \printbibliography
+\end{frame}
+
+\begin{frame}{Setup}
+    \begin{block}{\large Model}
+        \begin{itemize}
+            {\large
+            \item Transformer encoder model with 6 layers
+            \item GPT-2 blocks from~\cite{Radford2019LanguageMA}
+            \item Embedding of \texttt{\textcolor{orange}{<cls>}} as input to classifier
+            \item 96\% final accuracy on verb number prediction task
+            }
+        \end{itemize}
+    \end{block}
+
+    \vspace{1em}
+
+    \begin{block}{\large Dataset}
+        \begin{itemize}
+            {\large
+            \item Public subject-verb agreement dataset~\cite{linzen2016assessingabilitylstmslearn}
+            }
+        \end{itemize}
+    \end{block}
 \end{frame}
 
 \end{document}
