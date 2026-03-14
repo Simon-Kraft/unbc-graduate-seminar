@@ -1,0 +1,131 @@
+\documentclass[xcolor=table]{beamer} % Add xcolor=table here
+\input{preamble}
+
+\title{Quantifying Attention Flow in Transformers}
+
+% 2. The Original Authors (Placed in Subtitle to appear under title)
+\subtitle{
+    \vspace{-0.6em}
+    \color{CustomGray}
+    {\scriptsize {Samira Abnar, Willem Zuidema}} \\[-0.5em]
+    {\tiny {University of Amsterdam}}
+}
+
+\author{
+    \normalsize \textbf{\textcolor{UNBCGreen}{Simon Kraft}}\\[0.25em]
+    \small \textcolor{UNBCGreen}{University of Northern British Columbia}\\[0.25em]
+    \textcolor{UNBCGold}{\rule{4cm}{1.2pt}}\\[0.25em]
+    \scriptsize \textcolor{CustomGray}{March 18, 2026}
+}
+
+\date{ }
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Transformer Models}
+    \begin{columns}
+
+        \begin{column}{0.60\textwidth}
+            {\large
+            \begin{block}{\large Basics}
+                Proposed by famous paper \citetitle{vaswani2023attentionneed}~\cite{vaswani2023attentionneed}.
+                \begin{itemize}
+                    \item Numerous applications in NLP, Computer Vision, ...
+                    \item Process sequence of input \textbf{tokens}
+                    \item Stack of identical layers
+                    \item Each applying \textbf{Self-Attention}
+                \end{itemize}
+            \end{block}}
+        \end{column}
+
+        \begin{column}{0.45\textwidth}
+            \begin{figure}
+                \centering
+                \includegraphics[width=\textwidth]{gfx/transformer_model.png}
+                \vspace{-2.2em}
+                % Local font change
+                {\setbeamerfont{caption}{size=\footnotesize}
+                \setbeamerfont{caption name}{size=\footnotesize}
+                \caption{Transformer Model. Taken from~\cite{vaswani2023attentionneed}.}}
+            \end{figure}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Self-Attention}
+    
+    \begin{itemize}
+        {\large 
+        \item For sequence of input tokens $X = (x_1, \ldots, x_n) \in \mathbb{R}^{n \times d}$ compute self-attention with:
+        \vspace{0.5em}
+        \[
+            \text{Attention}(Q,K,V) = \text{softmax}\Big(\frac{Q K^\top}{\sqrt{d}}\Big) V
+        \]
+        \item where the matrices $Q$, $K$, and $V$ are different linear projections of the input tokens
+        }
+    \end{itemize}
+
+    \vspace{1.5em}
+
+    \begin{block}{\large Result}
+        {\large After this operation, each token captures \textbf{contextual information from all other tokens}.
+        }
+    \end{block}
+\end{frame}
+
+\begin{frame}{Problem Statement}
+    \begin{block}{\large Token Processing }
+        \begin{itemize}
+            {\large
+            \item Self-attention operation is executed in each layer
+            \vspace{0.25em}
+            \item Across layers, information from different tokens gets increasingly mixed
+            }
+        \end{itemize}
+
+        \vspace{1.0em}
+
+        \large \textbf{Research Question}: \textit{How can we quantify this information flow across multiple layers?}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Idea}
+    \large Model information flow in the network with a \textbf{Directed Acyclic Graph (DAG)}:
+    \begin{itemize}
+        {\large 
+        \item \textbf{Nodes}: Input tokens \& hidden embeddings
+        \item \textbf{Edges}: Attentions from nodes in each layer to those in previous layer
+        }
+    \end{itemize}
+
+    \vspace{1.5em}
+
+    \begin{block}{\large Verb Number Prediction Task}
+        \large \textit{Predicting singularity or plurality of a verb of a sentence, when the input is the sentence up to the verb position}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Attention Flow DAG}
+    \centering
+    \Large \textbf{Input}: \textit{the \textcolor{blue}{key} to the \textcolor{red}{cabinets} \dots} [\textbf{is} / \textbf{are}?]
+
+    % \vspace{-0.5em}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.8\textwidth, cfbox=lightgray 0.5pt 0pt]{gfx/attention_dag1.png}
+        \vspace{-0.5em}
+        \caption{Attention Flow Graph of tokenized input sentence.}
+    \end{figure}
+\end{frame}
+
+
+
+
+\begin{frame}
+    \printbibliography
+\end{frame}
+
+\end{document}

@@ -1,0 +1,19 @@
+.DS_Store
+
+# 1. Allow the directories themselves so Git can look inside
+!**/build/
+
+# 2. Ignore everything inside any build directory
+**/build/*
+
+# 3. BUT allow the PDF files inside those build directories
+!**/build/*.pdf
+
+# 4. Standard LaTeX noise elsewhere
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls

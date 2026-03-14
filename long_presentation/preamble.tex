@@ -1,0 +1,38 @@
+\usetheme{metropolis}           % Use the Metropolis theme
+\usecolortheme{metropolis}      % Optional: you can customize colors
+\usepackage[
+    backend=biber, 
+    style=ieee,
+    maxnames=3,
+    giveninits=true, 
+    doi=true,
+    isbn=false
+]{biblatex}
+
+\addbibresource{references.bib}
+
+\nocite{*}
+
+\usepackage{booktabs}
+
+
+% --- UNBC Branding ---
+\definecolor{UNBCGreen}{HTML}{004621} % Official UNBC Green
+\definecolor{UNBCGold}{HTML}{FFC20E}
+\definecolor{CustomGray}{HTML}{666666} % Subtle gray for original paper info
+
+\setbeamercolor{block title}{bg=UNBCGreen, fg=white}
+    
+\setbeamercolor{block body}{bg=black!5, fg=black}
+
+% 2. Change the Upper Banner (Frame Title)
+\setbeamercolor{frametitle}{bg=UNBCGreen, fg=white}
+
+% 3. Change Title Page and Section Page background
+\setbeamercolor{palette primary}{bg=UNBCGreen, fg=white}
+
+% 4. Change the Progress Bar to UNBC Gold for a nice contrast
+\setbeamercolor{progress bar}{fg=UNBCGold, bg=gray!30}
+
+% 5. Ensure Section Titles in the table of contents match
+\setbeamercolor{section title}{fg=UNBCGreen}

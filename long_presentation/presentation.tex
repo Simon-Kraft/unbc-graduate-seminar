@@ -1,0 +1,429 @@
+\documentclass[xcolor=table]{beamer} % Add xcolor=table here
+\input{preamble}
+
+\title{InstaHide: Instance-hiding Schemes for Private Distributed Learning}
+
+% 2. The Original Authors (Placed in Subtitle to appear under title)
+\subtitle{
+    \vspace{-0.6em}
+    \color{CustomGray}
+    {\scriptsize {Yangsibo Huang$^1$, Zhao Song$^{1,2}$, Kai Li$^1$, and Sanjeev Arora$^{1,2}$}} \\[-0.5em]
+    {\tiny {$^1$Princeton University, $^2$Institute for Advanced Study}}
+}
+
+\author{
+    \normalsize \textbf{\textcolor{UNBCGreen}{Simon Kraft}}\\[0.25em]
+    \small \textcolor{UNBCGreen}{University of Northern British Columbia}\\[0.25em]
+    \textcolor{UNBCGold}{\rule{4cm}{1.2pt}}\\[0.25em]
+    \scriptsize \textcolor{CustomGray}{February 25, 2026}
+}
+
+\date{ }
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Private Distributed Learning / Federated Learning}
+    \vspace{1.0em}
+    \begin{block}{Objective}
+        \vspace{0.1em}
+        Multiple decentralized clients with \textbf{sensitive private data} want to collaboratively train a shared \textbf{global model} 
+    \end{block}
+
+    % This ensures the space is "reserved" even when the image is hidden
+    \begin{uncoverenv}<2->
+        \vspace{-0.25em}
+        \begin{figure}
+            \centering
+            \includegraphics[width=1.0\textwidth]{gfx/federated_learning_example.png}
+            \vspace{-3.75em}
+            \caption{Federated Learning Architecture}
+        \end{figure}
+    \end{uncoverenv}
+\end{frame}
+
+\begin{frame}{Federated Learning Training Protocol}
+    {\large \textbf{For each training round:}}
+    % Added <+-> to reveal list items one by one
+    \begin{enumerate}[<+->]
+        \item \textbf{Local Training:} Clients train for one epoch with their private datasets
+        \item \textbf{Compute Loss:} Clients calculate loss gradient 
+        \item \textbf{Upload:} Gradients (updates) sent to global server
+        \item \textbf{Aggregation:} Server aggregates updates (e.g. averaging) and updates global model
+        \item \textbf{Distribution:} Updated global model weights sent to clients
+    \end{enumerate}
+    \vspace{1.5em}
+    % Block appears only after the list is finished
+    \begin{block}{Assumption}<6>
+        \centering
+        \textbf{Only loss gradients shared $\Rightarrow$ privacy-preserving}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Data Reconstruction Attacks}
+    \citetitle{zhu2019deepleakagegradients}~\cite{zhu2019deepleakagegradients} showed that private data can be \textbf{reconstructed from gradients}.
+    
+    \vspace{0.5em}
+
+    % Reserves space on slide 1, reveals image on slide 2
+    \begin{uncoverenv}<2->
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.7\textwidth]{gfx/DLG.png}
+            \vspace{-0.5em}
+            \caption{Global Server Reconstructs Private Images. Taken from~\cite{zhu2019deepleakagegradients}}
+        \end{figure}
+    \end{uncoverenv}
+\end{frame}
+
+\begin{frame}{First Solution: Differential Privacy}
+    \begin{block}{Differential Privacy (DP)}
+        Mathematical framework for releasing statistical information about datasets while protecting the privacy of individual data subjects.\footnote{\url{https://en.wikipedia.org/wiki/Differential_privacy}} 
+    \end{block}
+    \pause
+    \textbf{In Federated Learning}
+    \vspace{-0.5em}
+    \begin{itemize}[<+->]
+        \item Usually achieved by adding Gaussian noise to gradients
+        \item Requires careful calculations to compute the amount of noise that needs to be added
+    \end{itemize}
+    \vspace{1em}
+    \pause
+    \textbf{\textcolor{red}{Problem:}} Accuracy reduction over 20\% and longer training time
+\end{frame}
+
+\begin{frame}{InstaHide: Method}
+    \textbf{Goal:} Ensure privacy in federated learning without sacrificing accuracy.
+    
+    \vspace{1em}
+
+    % 1. The block appears on slide 2
+    \begin{block}{InstaHide}<2->
+        Two step procedure to encrypt a private training image
+        
+        % 2. The list items start revealing one-by-one starting from slide 3
+        \begin{enumerate}[<+(2)- | handout:0>]
+            \item \textbf{\textit{Mixup} augmentation:}
+            Take linear combination of private image with $k-1$ randomly chosen images from both private and public datasets~\cite{zhang2018mixupempiricalriskminimization}
+            
+            \vspace{0.75em}
+            
+            \item \textbf{Pixel-wise sign-flipping:} 
+            Apply random sign-flipping mask ($+1$ or $-1$) to composite image to destroy visual structure.
+        \end{enumerate}
+    \end{block}
+\end{frame}
+
+\begin{frame}{InstaHide: Method}
+    \vspace{1.0em}
+    \begin{figure}
+        \centering
+        \includegraphics[width=1.0\textwidth]{gfx/InstaHide_encryption.png}
+        \vspace{-0.25em}
+        \caption{InstaHide Encryption. Taken from~\cite{huang2021instahideinstancehidingschemesprivate}.}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{InstaHide: Training and Inference}
+    % First block appears on slide 2
+    \begin{block}{Training}<2->
+        Authors present two schemes for encryption
+        \begin{itemize}[<+(2)- | handout:0>]
+            \item \textbf{Inside-Dataset:} Mixing only with random images within the same private training dataset
+            \item \textbf{Cross-Dataset:} Mixing with random images from private training dataset and public dataset
+        \end{itemize}
+    \end{block}
+
+    \vspace{1em}
+
+    % Second block appears after the first list is finished (slide 5)
+    \begin{block}{Inference}<5->
+        Both schemes applied during inference
+        \begin{itemize}[<+(4)- | handout:0>]
+            \item Test image is encrypted \textbf{multiple times} (e.g. 10)
+            \item Average predictions
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{InstaHide: Dynamic Encryption}
+    \textbf{Note:} Every private image is re-encrypted every epoch
+    
+    % The list starts revealing one-by-one starting from slide 2
+    \begin{itemize}[<+(1)- | handout:0>]
+        \item Different blend of private and public images 
+        \item Different mixing ratio ($\lambda$'s)
+        \item Different sign-flipping mask
+    \end{itemize}
+    
+    \vspace{0.75em}
+
+    % The block appears after the 3 items (slide 5)
+    \begin{block}{Result}<5->
+        \textit{One-time encryption key} that is never reused for another encryption.
+    \end{block}
+\end{frame}
+
+% \begin{frame}{InstaHide: Security}
+%     \begin{figure}
+%         \centering
+%         \includegraphics[width=1.0\textwidth]{gfx/InstaHide_empirical_distribution.png}
+%         \caption{Empirical Distribution of pixel-wise mean and standard deviation for 10 different images. Each encrypted 400 times. Taken from~\cite{huang2021instahideinstancehidingschemesprivate}.}
+%     \end{figure}
+%     \vspace{0.5em}
+%     \pause
+%     \begin{block}{Takeaways}
+%         \begin{itemize}[<+->]
+%         \item Distributions overlap almost perfectly
+%         \item Prevent Information Leakage through Statistical Analysis
+%     \end{itemize}
+%     \end{block}
+% \end{frame}
+
+\begin{frame}{InstaHide: Experimental Setup}
+    \centering
+    \renewcommand{\arraystretch}{1.8} 
+    \setlength{\arrayrulewidth}{1.2pt} 
+    \begin{small}
+    \rowcolors{2}{white}{black!15} 
+    \begin{table}
+    \begin{tabular}{p{2.8cm}  p{3.2cm}  p{3.5cm}}
+        \hline
+        \rowcolor{UNBCGreen} 
+        \textcolor{white}{\textbf{Private Dataset}} & 
+        \textcolor{white}{\textbf{Architecture}} & 
+        \textcolor{white}{\textbf{Public Dataset}} \\
+        \hline
+        \textcolor{black}{MNIST}           & \textcolor{black}{ResNet-18}           & \textcolor{black}{CIFAR-10}           \\ \hline
+        \textcolor{black}{CIFAR-10}        & \textcolor{black}{ResNet-18}           & \textcolor{black}{ImageNet}           \\ \hline
+        \textcolor{black}{CIFAR-100}       & \textcolor{black}{NasNet}              & \textcolor{black}{ImageNet}           \\ \hline
+        \textcolor{black}{ImageNet}        & \textcolor{black}{ResNeXt-50}          & \textcolor{black}{-}           \\ \hline
+    \end{tabular}
+    \caption{Experiment configurations across datasets}
+    \end{table}
+    \end{small}
+    \pause
+    \begin{block}{Note}
+        Public dataset usually \textbf{larger} and more diverse than private dataset.
+    \end{block}
+\end{frame}
+
+\begin{frame}{InstaHide: varying $k$}
+    \vspace{2em}
+    \begin{figure}
+        \centering
+        \includegraphics[width=1.0\textwidth]{gfx/InstaHide_test_accuracy.png}
+        \caption{Test accuracy (\%) for vanilla training and inside-dataset \textit{InstaHide} encryption with different $k$. Taken from~\cite{huang2021instahideinstancehidingschemesprivate}.}
+    \end{figure}
+    % \pause
+    % \begin{small}
+    %     \begin{block}{Observations}
+    %         \begin{itemize}[<+->]
+    %             \item Only minor accuracy drops for $k \leq 4$
+    %             \item Increased accuracy on CIFAR datasets with $k=2$ (data augmentation)
+    %         \end{itemize}
+    %     \end{block}
+    % \end{small}
+\end{frame}
+
+\begin{frame}{InstaHide: Inside-Dataset v.s. Cross-Dataset}
+    \centering
+    \renewcommand{\arraystretch}{1.4} 
+    \setlength{\arrayrulewidth}{1.2pt} 
+    \colorlet{DimGray}{black!15}
+    \colorlet{DimText}{black!30}
+    \begin{small}
+    \begin{tabular}{l c c c c}
+        \hline
+        \rowcolor{UNBCGreen} 
+        \textcolor{white}{\textbf{Method}} & 
+        {\color<1>{white}\color<2-4>{DimText} \textbf{MNIST}} & 
+        {\color<2>{white}\color<1,3,4>{DimText} \textbf{CIFAR-10}} & 
+        {\color<3>{white}\color<1,2,4>{DimText} \textbf{CIFAR-100}} & 
+        {\color<4>{white}\color<1-3>{DimText} \textbf{ImageNet}} \\
+        \hline
+        \textcolor{black}{Vanilla training} & 
+        {\color<1>{black}\color<2-4>{DimText} $99.5 \pm 0.1$} & 
+        {\color<2>{black}\color<1,3,4>{DimText} $94.8 \pm 0.1$} & 
+        {\color<3>{black}\color<1,2,4>{DimText} $77.9 \pm 0.2$} & 
+        {\color<4>{black}\color<1-3>{DimText} $77.4$} \\ \hline
+        \textcolor{black}{InstaHide$_{inside, k=4}$} & 
+        {\color<1>{black}\color<2-4>{DimText} $98.2 \pm 0.2$} & 
+        {\color<2>{black}\color<1,3,4>{DimText} $91.4 \pm 0.2$} & 
+        {\color<3>{black}\color<1,2,4>{DimText} $73.2 \pm 0.2$} & 
+        {\color<4>{black}\color<1-3>{DimText} $72.6$} \\ \hline
+        % \textcolor{black}{InstaHide$_{inside, k=4}$} & 
+        % {\color<1>{black}\color<2-4>{DimText} $98.2 \pm 0.3$} & 
+        % {\color<2>{black}\color<1,3,4>{DimText} $91.2 \pm 0.2$} & 
+        % {\color<3>{black}\color<1,2,4>{DimText} $73.1 \pm 0.3$} & 
+        % {\color<4>{black}\color<1-3>{DimText} $1.4$} \\ \hline
+        \textcolor{black}{InstaHide$_{cross, k=4}$} & 
+        {\color<1>{black}\color<2-4>{DimText} $98.1 \pm 0.2$} & 
+        {\color<2>{black}\color<1,3,4>{DimText} $90.3 \pm 0.2$} & 
+        {\color<3>{black}\color<1,2,4>{DimText} $72.8 \pm 0.3$} & 
+        {\color<4>{black}\color<1-3>{DimText} $-$} \\ \hline
+        % \textcolor{black}{InstaHide$_{cross, k=4}$} & 
+        % {\color<1>{black}\color<2-4>{DimText} $97.8 \pm 0.2$} & 
+        % {\color<2>{black}\color<1,3,4>{DimText} $90.7 \pm 0.2$} & 
+        % {\color<3>{black}\color<1,2,4>{DimText} $73.2 \pm 0.2$} & 
+        % {\color<4>{black}\color<1-3>{DimText} $-$} \\ \hline
+        \textcolor{black}{InstaHide$_{cross, k=6}$} & 
+        {\color<1>{black}\color<2-4>{DimText} $97.4 \pm 0.2$} & 
+        {\color<2>{black}\color<1,3,4>{DimText} $89.6 \pm 0.3$} & 
+        {\color<3>{black}\color<1,2,4>{DimText} $72.1 \pm 0.2$} & 
+        {\color<4>{black}\color<1-3>{DimText} $-$} \\ \hline
+        % \textcolor{black}{InstaHide$_{cross, k=6}$} & 
+        % {\color<1>{black}\color<2-4>{DimText} $97.3 \pm 0.1$} & 
+        % {\color<2>{black}\color<1,3,4>{DimText} $89.8 \pm 0.3$} & 
+        % {\color<3>{black}\color<1,2,4>{DimText} $71.9 \pm 0.3$} & 
+        % {\color<4>{black}\color<1-3>{DimText} $-$} \\ \hline
+    \end{tabular}
+    \end{small}
+    % \vspace{1.5em}
+    % \begin{block}{Highlights}
+    %     \only<1>{
+    %     \begin{itemize}
+    %         \item MNIST: Stable accuracy across all $k$ values
+    %     \end{itemize}}
+    %     \only<2>{
+    %     \begin{itemize}
+    %         \item CIFAR-10: Cross-dataset mixing ($k=6$) still holds $\sim 90\%$
+    %     \end{itemize}}
+    %     \only<3>{
+    %         \begin{itemize}
+    %             \item CIFAR-100: Robust performance despite high class number
+    %         \end{itemize}
+    %     }
+    %     \only<4>{
+    %         \begin{itemize}
+    %             \item ImageNet: Massive gap between inference with and without \textit{InstaHide}
+    %         \end{itemize}
+    %     }
+    % \end{block}
+\end{frame}
+
+\begin{frame}{Gradient Matching Attack}
+    Data reconstruction attack from \citetitle{zhu2019deepleakagegradients}~\cite{zhu2019deepleakagegradients}.
+    
+    \vspace{1em}
+
+    % Reserves the space on slide 1, shows the figure on slide 2
+    \begin{uncoverenv}<2->
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{gfx/original_image.png}
+            \vspace{-1em}
+            \caption{Original Image. Taken from~\cite{huang2021instahideinstancehidingschemesprivate}.}
+        \end{figure}
+    \end{uncoverenv}
+\end{frame}
+
+\begin{frame}{Gradient Matching Attack}
+    \begin{columns}[c]
+        \begin{column}{0.35\textwidth}
+            % This image is visible from the start (slide 1)
+            \begin{figure}
+                \centering
+                \includegraphics[width=\textwidth]{gfx/original_image.png}
+                \vspace{-1.2em}
+                \\[-0.5em] {\scriptsize Original Image}
+            \end{figure}
+        \end{column}
+
+        \begin{column}{0.65\textwidth}
+            % This image is also visible from the start (slide 1)
+            \begin{uncoverenv}<2->
+                \begin{figure}
+                    \centering
+                    \includegraphics[width=0.7\textwidth]{gfx/mixup_instahide.png}
+                    \\[-0.5em] {\scriptsize After mixing}
+                \end{figure}
+            \end{uncoverenv}
+            
+            \vspace{-0.7em} 
+
+            % This image only appears on the second click (slide 2)
+            % uncoverenv reserves the space so the first image doesn't move
+            \begin{uncoverenv}<3->
+                \begin{figure}
+                    \centering
+                    \includegraphics[width=0.7\textwidth]{gfx/recovered_by_dlg.png}
+                    \\[-0.5em] {\scriptsize Recovered by attack}
+                \end{figure}
+            \end{uncoverenv}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{InstaHide: Challenge Dataset}
+    \begin{itemize}[<+->]
+        \item Authors released challenge dataset of encrypted images\footnote{\url{https://github.com/Hazelsuko07/InstaHide_Challenge}}
+        \item Cross-dataset \textit{InstaHide} with $k=6$
+        \item Using a private image dataset and ImageNet as public dataset
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Carlini et al.'s Attack}
+    The publication \citetitle{carlini2021privatelearningpossibleinstance}~\cite{carlini2021privatelearningpossibleinstance} successfully \textbf{broke encryption} scheme of \textit{InstaHide}. 
+    \vspace{1em}
+    \pause
+    \begin{block}{Approach}
+        \begin{enumerate}[<+->]
+            \item Train neural network for similarity annotation
+            \vspace{0.25em}
+            \item Run combinatorial clustering algorithm to cluster based on private images (\textbf{cubic} time in size of private dataset)
+            \vspace{0.25em}
+            \item A regression algorithm solves for the original pixels
+        \end{enumerate}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Carlini et al.'s Results}
+    \begin{figure}
+        \centering
+        \includegraphics[width=1.0\textwidth]{gfx/carlini_original.png}
+        \\[-0.5em] {\scriptsize Original Images}
+        \vspace{1.0em}
+
+        \pause
+        \includegraphics[width=1.0\textwidth]{gfx/carlini_reconstructed.png}
+        \\[-0.5em] {\scriptsize Reconstructed Images}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Conclusion}
+    \begin{block}{Utility}
+        \begin{itemize}[<+->]
+            \item \textit{InstaHide} provides light-weight encryption method for distributed learning
+            \item Small accuracy drop compared to vanilla training
+            \item Higher inference time due to prediction averaging
+        \end{itemize}
+    \end{block}
+    \vspace{1em}
+    \pause
+    \begin{block}{Security}
+        \begin{itemize}[<+->]
+            \item One-time encryption key in every epoch
+            \item Effective defense against \citetitle{zhu2019deepleakagegradients}
+            \item Attackers found $\mathcal{O}(N^3)$ algorithm to break encryption
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}
+
+    \centering
+
+    \LARGE \textbf{Thank you for your attention!}
+
+
+    \large \textbf{Any questions?}
+
+\end{frame}
+
+\begin{frame}
+    \printbibliography
+\end{frame}
+
+\end{document}
