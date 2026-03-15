@@ -1,0 +1,34 @@
+
+\usepackage[
+    backend=biber, 
+    style=ieee,
+    maxnames=3,
+    giveninits=true, 
+    doi=true,
+    isbn=false
+]{biblatex}
+
+\addbibresource{references.bib}
+
+% 6. Layout
+\usepackage{geometry}
+\geometry{left=3cm,right=3cm,top=3cm,bottom=3cm}
+\setlength{\parindent}{0pt}
+
+
+\usepackage[unicode=true]{hyperref} % enables use of metadata for pdfs and hyperlinks within a document
+\hypersetup{%colorlinks=true
+% activate this part for the boxes 
+colorlinks=false, %flag for prints
+pdfborder={0 0 1}, % thickness of box
+linkbordercolor={1 0 0},
+% activate this part to not have the boxes
+% hidelinks,  % this option would hide links for the print version of your thesis
+% linkcolor=red!35!black,    %definition of the link color
+% citecolor=green!35!black,  %definition of the cite color
+% urlcolor=magenta!35!black, %definition of the url color
+pdfauthor=Simon Kraft, % Optional: Specify the author of the pdf
+pdftitle=Assignment 1   % Optional: Specify the title within the pdf
+} 
+\usepackage[capitalize,noabbrev]{cleveref}
+

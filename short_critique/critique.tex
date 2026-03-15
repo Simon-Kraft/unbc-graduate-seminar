@@ -1,0 +1,90 @@
+\documentclass[12pt,a4paper]{article}
+\input{preamble}
+
+
+% \addbibresource{references.bib} % Note the .bib extension is required here
+
+% --- Document Metadata ---
+\title{
+    % \vspace{5em}
+    \large \textbf{CPSC 704 - Graduate Seminar in Computer Science} \\
+
+    \huge \textbf{Paper Critique} \\
+
+    \vspace{0.5em}
+
+    \large \textit{Quantifying Attention Flow in Transformers}
+}
+
+\author{
+    \large Submitted by \\[0.2cm]
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Student ID} & \textbf{Name} \\
+        \hline
+        230171256 & Simon Kraft \\
+        \hline
+    \end{tabular}
+}
+
+\date{March 18, 2026}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\section{Summary}
+
+
+% \section{Summary}
+
+% The work \citetitle{huang2021instahideinstancehidingschemesprivate} by~\citeauthor{huang2021instahideinstancehidingschemesprivate}~\cite{huang2021instahideinstancehidingschemesprivate} proposes a lightweight encryption scheme to protect data privacy in distributed and federated learning environments. \\
+
+% The core hypothesis is that training models on the images encrypted with \textit{InstaHide} maintains a high model accuracy while providing robust protection against data reconstruction attacks. \\
+
+% The proposed encryption method involves a two-step procedure:
+
+% \begin{enumerate}
+%     \item \textbf{Mixup:} A sensitive private image is linearly combined with $k-1$ random images drawn from either a private dataset (Inside-dataset \textit{InstaHide}) or a large public dataset like ImageNet (Cross-dataset \textit{InstaHide}) to create a composite image.
+%     \item \textbf{Sign-flipping:} The composite image is multiplied by random mask of $+1$ and $-1$ to flip signs randomly to destroy the visual structure of the image.
+% \end{enumerate}
+
+% This encryption process is executed for every image in every epoch. As the blend of private and public images, the mixing ratios, and the sign-flipping masks are all drawn randomly, they effectively work as an one-time encryption key that is unlikely to ever be reused. \\
+
+% \textit{InstaHide} is evaluated across MNIST, CIFAR-10, CIFAR-100, and ImageNet datasets. The results show that \textit{InstaHide} only suffers from a small accuracy loss within $1-5\%$ of the vanilla training method. Furthermore, the authors show that \textit{InstaHide} can effectively protect against the data reconstruction attack \citetitle{zhu2019deepleakagegradients}~\cite{zhu2019deepleakagegradients}.
+
+% \section{Shortcomings}
+
+% The authors solely conduct an empirical evaluation of the security of their encryption scheme. Instead of assessing the security of \textit{InstaHide} in the mathematical framework of $(\epsilon, \delta)$ Differential Privacy - which is a common approach for papers in this area - the authors only provide qualitative evidence. \\
+
+% Additionally, the paper focuses exclusively on computer vision tasks and does not give any hints on how the method could be adapted for other modalities like natural language processing (NLP) or tabular data.
+
+% \section{Flaws in Theory}
+
+% The authors underestimate the vulnerability of their method against similarity-based attacks. While they acknowledge that a Generative Adversarial Network (GAN) can partially undo the sign-flipping, they fail to address the inherent weakness of simply mixing multiple images using a linear combination. Under certain theoretical assumptions, it is possible to design multiple attack mechanisms that use averaging and similarity search to exploit the encryption scheme. Consequently, the work by \citeauthor{carlini2021privatelearningpossibleinstance} successfully demonstrated that the encryption scheme can be broken.
+
+% Nevertheless, it is noteworthy that the authors included all the proposed attacks in the refined version of their paper. This demonstrates a commitment to transparency and collaborative research.
+
+% \section{Unanswered Questions}
+
+% \begin{itemize}
+%     \item Quantitative Assessment of Utility-Privacy trade-off?
+%     \item Differential Privacy requirement of \textit{InstaHide}?
+%     \item Evaluation in Federated Learning scenario?
+%     \item Mathematical lower bound for number of epochs and samples to achieve critical?
+% \end{itemize}
+
+% \section{Future Research}
+
+% Despite \textit{InstaHide}'s vulnerabilities, it still represents a shift towards instance-hiding as a practical alternative to Differential Privacy. The promising research avenues for future studies could be:
+
+% \begin{itemize}
+%     \item \textbf{Generalization to NLP:} Explore mixing of tokens and perturbations on embedding level. Investigate if Mixup can be applied in private distributed training of Large Language Models (LLMs).
+%     \item \textbf{Adaptive Masking:} Apply ''learned masks'' to specifically hide sensitive features in input images, while preserving non-sensitive features.
+%     \item \textbf{Robustness against Averaging:} Develop non-linear methods to mix images to thwart reconstruction attacks.
+%     \item \textbf{Robustness against Clustering:} Dynamically vary the learned feature of the same image across different training epochs to defend against the attack used by \citeauthor{carlini2021privatelearningpossibleinstance}.
+% \end{itemize}
+
+\end{document}
