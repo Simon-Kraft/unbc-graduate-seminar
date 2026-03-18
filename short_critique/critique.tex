@@ -37,54 +37,45 @@
 
 \section{Summary}
 
+The work \citetitle{abnar-zuidema-2020-quantifying} by~\citeauthor{abnar-zuidema-2020-quantifying}~\cite{abnar-zuidema-2020-quantifying} proposes two approaches to quantify and visualize the raw attention weights of Transformer models as explanations for the model's decisions. \\
 
-% \section{Summary}
+Usually, the self-attention mechanism in Transformer models is used so that the information of multiple tokens can get ''mixed'', i.e. the representation of each token captures information, also called \textit{context}, from all other processed tokens. While this mechanism is really powerful to model long-range dependencies between tokens, it complicates interpretability. As information propagates through successive layers, the attention weights, i.e. the amount how much one token's representation influences another's token representation, becomes harder to understand, as the hidden representation of the token already contains a mixture of the entire token sequence. \\
 
-% The work \citetitle{huang2021instahideinstancehidingschemesprivate} by~\citeauthor{huang2021instahideinstancehidingschemesprivate}~\cite{huang2021instahideinstancehidingschemesprivate} proposes a lightweight encryption scheme to protect data privacy in distributed and federated learning environments. \\
+To overcome this, the authors model the information flow between tokens over multiple layers as a Directed Acyclic Graph (DAG), in which the nodes are the input tokens or the hidden embeddings, and the edges model the attention weights from nodes in each layer to those representations in the previous layer. Based on this DAG, they introduce two distinct methods:
 
-% The core hypothesis is that training models on the images encrypted with \textit{InstaHide} maintains a high model accuracy while providing robust protection against data reconstruction attacks. \\
+\begin{itemize}
+    \item \textbf{Attention Rollout:} This method assumes that input token identities are linearly combined across layers. It recursively multiplies the attention matrices from the input layer to the target layer. This effectively sums the products of edge weights along all possible paths between two nodes.
+    \item \textbf{Attention Flow:} This method treats the attention graph as a flow network where attention weights act as edge capacities. By applying a maximum flow algorithm, it computes the total information flow from hidden embeddings to input tokens. This provides a more strict distinction between tokens who constantly had a high attention score and tokens who maybe only had a high attention score in one of the layers.
+\end{itemize}
 
-% The proposed encryption method involves a two-step procedure:
 
-% \begin{enumerate}
-%     \item \textbf{Mixup:} A sensitive private image is linearly combined with $k-1$ random images drawn from either a private dataset (Inside-dataset \textit{InstaHide}) or a large public dataset like ImageNet (Cross-dataset \textit{InstaHide}) to create a composite image.
-%     \item \textbf{Sign-flipping:} The composite image is multiplied by random mask of $+1$ and $-1$ to flip signs randomly to destroy the visual structure of the image.
-% \end{enumerate}
+\section{Shortcomings}
 
-% This encryption process is executed for every image in every epoch. As the blend of private and public images, the mixing ratios, and the sign-flipping masks are all drawn randomly, they effectively work as an one-time encryption key that is unlikely to ever be reused. \\
+One shortcoming of the work is the relatively narrow scope of the experimental evaluation. While the methods show high correlation with ground-truth importance scores on the syntactic task of verb number prediction, they perform significantly worse on semantic tasks like sentiment analysis (SST-2). In the latter case, the proposed methods showed low correlation with input gradients, this suggests that they may not fully capture the dependencies within large-scale, fine-tuned models.
 
-% \textit{InstaHide} is evaluated across MNIST, CIFAR-10, CIFAR-100, and ImageNet datasets. The results show that \textit{InstaHide} only suffers from a small accuracy loss within $1-5\%$ of the vanilla training method. Furthermore, the authors show that \textit{InstaHide} can effectively protect against the data reconstruction attack \citetitle{zhu2019deepleakagegradients}~\cite{zhu2019deepleakagegradients}.
+Furthermore, the authors did not apply their method on datasets beyond the NLP domain. 
 
-% \section{Shortcomings}
+\section{Flaws in Theory}
 
-% The authors solely conduct an empirical evaluation of the security of their encryption scheme. Instead of assessing the security of \textit{InstaHide} in the mathematical framework of $(\epsilon, \delta)$ Differential Privacy - which is a common approach for papers in this area - the authors only provide qualitative evidence. \\
+The theoretical framework of Attention Rollout and Attention Flow relies on the assumption that the non-linear activations functions and the linear transformations that are applied in the position-wise feed-forward network in each transformer layer can be ignored. Furthermore, the layer normalizations in each transformer layer are ignored. \\
 
-% Additionally, the paper focuses exclusively on computer vision tasks and does not give any hints on how the method could be adapted for other modalities like natural language processing (NLP) or tabular data.
+In their modeling approach, the authors treat the attention weights as the sole proxy for information transfer within a transformer network. This may not be the case, especially not when transformer networks become more deep and have multiple successive layers.
 
-% \section{Flaws in Theory}
 
-% The authors underestimate the vulnerability of their method against similarity-based attacks. While they acknowledge that a Generative Adversarial Network (GAN) can partially undo the sign-flipping, they fail to address the inherent weakness of simply mixing multiple images using a linear combination. Under certain theoretical assumptions, it is possible to design multiple attack mechanisms that use averaging and similarity search to exploit the encryption scheme. Consequently, the work by \citeauthor{carlini2021privatelearningpossibleinstance} successfully demonstrated that the encryption scheme can be broken.
+\section{Unanswered Questions}
 
-% Nevertheless, it is noteworthy that the authors included all the proposed attacks in the refined version of their paper. This demonstrates a commitment to transparency and collaborative research.
+The following questions regarding the scalability and generalizability remain unanswered by the paper:
+\begin{itemize}
+    \item How do these methods scale with much deeper architectures, with e.g. 24 or 48 layers, where the "mixing" of tokens is significantly more extreme?
+    \item How can these methods be adapted for Transformer decoders with causal masking, which naturally biases attention toward early tokens in a sequence?~\cite{abnar-zuidema-2020-quantifying}
+    \item How can these methods be applied to other domains like Computer Vision?
+    \item Can token attention scores be used during training (e.g., as a regularizer) to actively encourage more interpretable information flow, rather than just being used as a post-training diagnostic tool?
+\end{itemize}
 
-% \section{Unanswered Questions}
+\section{Future Research}
 
-% \begin{itemize}
-%     \item Quantitative Assessment of Utility-Privacy trade-off?
-%     \item Differential Privacy requirement of \textit{InstaHide}?
-%     \item Evaluation in Federated Learning scenario?
-%     \item Mathematical lower bound for number of epochs and samples to achieve critical?
-% \end{itemize}
+The authors propose different avenues for further research. For instance, one approach could be to combine the attention graph with gradient information to build a more accurate flow of attention instead of solely relying on the raw attention weights for the explanations. Furthermore, the authors invite their audience to think about ways to adapt their method to transformer decoder models. These decoder models use causal masking which usually leads to a more focused attention towards the earlier tokens in a sequence. Lastly, one could examine ways to integrate the effects of the position-wise feed-forward networks to the explanation strategy.
 
-% \section{Future Research}
 
-% Despite \textit{InstaHide}'s vulnerabilities, it still represents a shift towards instance-hiding as a practical alternative to Differential Privacy. The promising research avenues for future studies could be:
-
-% \begin{itemize}
-%     \item \textbf{Generalization to NLP:} Explore mixing of tokens and perturbations on embedding level. Investigate if Mixup can be applied in private distributed training of Large Language Models (LLMs).
-%     \item \textbf{Adaptive Masking:} Apply ''learned masks'' to specifically hide sensitive features in input images, while preserving non-sensitive features.
-%     \item \textbf{Robustness against Averaging:} Develop non-linear methods to mix images to thwart reconstruction attacks.
-%     \item \textbf{Robustness against Clustering:} Dynamically vary the learned feature of the same image across different training epochs to defend against the attack used by \citeauthor{carlini2021privatelearningpossibleinstance}.
-% \end{itemize}
 
 \end{document}
